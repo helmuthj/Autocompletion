@@ -1,12 +1,20 @@
-import java.lang.StringBuilder
-import java.util.Scanner
+import java.io.File
 
 fun main(arg: Array<String>) {
-    //printSq()
-    switchTerminalMode(true)
-    eraseScreen()
-    interactive()
-    switchTerminalMode(false)
+
+    var words: List<String> = loadWords()
+
+    var matchingWords: MutableList<String> = findMatchingWords(words,"dr")
+
+    for (mw in matchingWords) {
+        println(mw)
+    }
+
+    //switchTerminalMode(true)
+    //eraseScreen()
+    //interactive(words)
+    //switchTerminalMode(false)
+
 }
 
 const val escCode: String = "\u001B"
@@ -56,7 +64,7 @@ fun printSq(): Unit {
     }
 }
 
-fun interactive(): Unit {
+fun interactive(words: List<String>): Unit {
 
     val console = System.console()
     val reader = console.reader()
@@ -81,4 +89,24 @@ fun interactive(): Unit {
         placeCursor(4,1)
         println(word+"_XYZ")
     }
+}
+
+fun loadWords(): List<String>{
+    val file = File("data/english-nouns.txt")
+    return file.readLines()
+}
+
+fun findMatchingWords(words: List<String>, subString: String): MutableList<String> {
+    var matchingWords: MutableList<String> = mutableListOf<String>()
+    val l1: Int = subString.length
+    var l2: Int
+    for (word in words) {
+        l2 = word.length
+        // lazy?
+        // ask for permission or ask for forgiveness?
+        if (l2>=l1 && word.subSequence(0,l1)==subString) {
+            matchingWords.add(word)
+        }
+    }
+    return matchingWords
 }
