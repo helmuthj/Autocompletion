@@ -4,11 +4,14 @@ fun main(arg: Array<String>) {
 
     var words: List<String> = loadWords()
 
-    var matchingWords: MutableList<String> = findMatchingWords(words,"dr")
+    var substring: String = "dr"
+    var matchingWords: MutableList<String> = findMatchingWords(words,substring)
 
-    for (mw in matchingWords) {
-        println(mw)
-    }
+    val cw: ConsoleWrapper = ConsoleWrapper()
+    cw.switchTerminalMode(rawMode = true)
+    cw.updateAndDisplayState(substring,matchingWords)
+    var c = cw.readNextChar()
+    cw.switchTerminalMode(rawMode = false)
 
     //switchTerminalMode(true)
     //eraseScreen()
@@ -17,77 +20,66 @@ fun main(arg: Array<String>) {
 
 }
 
-const val escCode: String = "\u001B"
+class ConsoleWrapper() {
 
-fun switchTerminalMode(rawMode: Boolean = false): Unit {
-    // switches terminal to normal (line) mode
-    var cmd = arrayOf("/bin/sh", "-c", "stty sane </dev/tty")
-    if (rawMode)
+    private val escCode: String = "\u001B"
+    private val console = System.console()
+    private val reader = console.reader()
+
+    private var cursorPosition: Int = 1
+
+    fun switchTerminalMode(rawMode: Boolean = false): Unit {
+        // switches terminal to normal (line) mode
+        var cmd = arrayOf("/bin/sh", "-c", "stty sane </dev/tty")
+        if (rawMode)
         // switches terminal to raw (character) mode
-        cmd = arrayOf("/bin/sh", "-c", "stty raw </dev/tty")
+            cmd = arrayOf("/bin/sh", "-c", "stty raw </dev/tty")
 
-    // execute command
-    Runtime.getRuntime().exec(cmd).waitFor()
-}
-
-fun eraseScreen(): Unit {
-    print("${escCode}[2J")
-}
-
-fun deleteLine(R: Int?): Unit {
-    if (R != null) {
-        placeCursor(R, 1)
-        print("${escCode}[2K")
+        // execute command
+        Runtime.getRuntime().exec(cmd).waitFor()
     }
-}
 
-fun placeCursor(R: Int?, C: Int?): Unit {
-    if(R != null || C != null) {
-        print("${escCode}[${R};${C}f")
+    private fun eraseScreen(): Unit {
+        print("${escCode}[2J")
     }
-    else {
-        print("${escCode}[;H")
-    }
-}
 
-fun printSq(): Unit {
-    // prints square at 1,1 cursor position
-
-    // print N by M "x"'s
-    val N: Int = 5
-    val M: Int = 5
-    for (i in 1..N) {
-        for (j in 1..M) {
-            placeCursor(i,j)
-            print("x")
+    private fun deleteLine(R: Int?): Unit {
+        if (R != null) {
+            placeCursor(R, 1)
+            print("${escCode}[2K")
         }
     }
-}
 
-fun interactive(words: List<String>): Unit {
+    private fun placeCursor(R: Int?, C: Int?): Unit {
+        if (R != null || C != null) {
+            print("${escCode}[${R};${C}f")
+        } else {
+            print("${escCode}[;H")
+        }
+    }
 
-    val console = System.console()
-    val reader = console.reader()
-    var charnum: Int
-    var word: String = ""
+    private fun printlnAt(R: Int, line: String): Unit {
+        placeCursor(R,1)
+        println(line)
+    }
 
-    for (i in 1..3) {
-        placeCursor(1,i)
-        charnum = reader.read()
-        word += charnum.toChar()
+    fun readNextChar(): Char {
+        // read input and return
+        return this.reader.read().toChar()
+    }
 
-        placeCursor(1,1)
-        println(word)
+    fun updateAndDisplayState(substring: String, matches: List<String>): Unit {
+        // update internal state of cursor
+        this.cursorPosition = substring.length+1
 
-        deleteLine(2)
-        deleteLine(3)
-        deleteLine(4)
-        placeCursor(2,1)
-        println(word+"_X")
-        placeCursor(3,1)
-        println(word+"_YZ")
-        placeCursor(4,1)
-        println(word+"_XYZ")
+        // FIXME: find a less brutal way of preparing the screen for printing
+        eraseScreen()
+        printlnAt(1, substring)
+
+        for (i in matches.indices) {
+            printlnAt(i+2, matches[i])
+        }
+        placeCursor(R=1,C=this.cursorPosition)
     }
 }
 
