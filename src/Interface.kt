@@ -6,25 +6,27 @@ fun main(arg: Array<String>) {
     val cw: ConsoleWrapper = ConsoleWrapper()
     var substring: String = ""
     var matches: MutableList<String> = mutableListOf<String>()
+    var c: Char
+
+    val BACKSPACE: Char = '\u0008'
+    val DEL: Char = '\u007F'
+    val ENTER: Char = '\u000D'
 
     cw.initConsole()
 
-    for(i in 1..4) {
-        cw.updateAndDisplayState("", matches)
-
-        substring += cw.readNextChar()
-
+    cw.updateAndDisplayState(substring, matches)
+    // TODO: create while loop, add more control characters
+    mainloop@for(i in 1..4) {
+        c = cw.readNextChar()
+        when(c) {
+            ENTER->break@mainloop
+            DEL->substring=substring.dropLast(1)
+            else->substring+=c
+        }
         matches = wm.findMatchingWords(words = null, subString = substring)
+        cw.updateAndDisplayState(substring,matches)
     }
-    cw.updateAndDisplayState(substring,matches)
-
     cw.resetConsole()
-
-    //switchTerminalMode(true)
-    //eraseScreen()
-    //interactive(words)
-    //switchTerminalMode(false)
-
 }
 
 class ConsoleWrapper() {
@@ -34,6 +36,8 @@ class ConsoleWrapper() {
     private val reader = console.reader()
 
     private var cursorPosition: Int = 1
+
+    private val maxMatches: Int = 10
 
     private fun switchTerminalMode(rawMode: Boolean = false): Unit {
         // switches terminal to normal (line) mode
@@ -96,6 +100,8 @@ class ConsoleWrapper() {
         printlnAt(1, substring)
 
         for (i in matches.indices) {
+            if (i>this.maxMatches)
+                break
             printlnAt(i+2, matches[i])
         }
         placeCursor(R=1,C=this.cursorPosition)
@@ -113,21 +119,27 @@ class WordMatcher() {
 
     fun findMatchingWords(words: List<String>?, subString: String): MutableList<String> {
         var matchingWords: MutableList<String> = mutableListOf<String>()
-        val l1: Int = subString.length
-        var l2: Int
+
         var useWords: List<String> = this.words
         if (words!=null) {
             useWords = words
         }
 
+        var score: Float
         for (word in useWords) {
-            l2 = word.length
-            // lazy?
-            // ask for permission or ask for forgiveness?
-            if (l2 >= l1 && word.subSequence(0, l1) == subString) {
+            score = scoreSubMatch(subString, word)
+            if(score==1.0f) {
                 matchingWords.add(word)
             }
         }
         return matchingWords
+    }
+
+    fun scoreSubMatch(sub: String, word: String): Float {
+        val ls: Int = sub.length
+        val lw: Int = word.length
+        if (lw >= ls && word.subSequence(0, ls) == sub)
+            return 1.0f
+        return 0.0f
     }
 }
