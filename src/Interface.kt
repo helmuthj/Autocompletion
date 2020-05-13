@@ -6,24 +6,50 @@ fun main(arg: Array<String>) {
     val cw: ConsoleWrapper = ConsoleWrapper()
     var substring: String = ""
     var matches: MutableList<String> = mutableListOf<String>()
+    var subTreeExists: Boolean = false
     var c: Char
 
-    val BACKSPACE: Char = '\u0008'
     val DEL: Char = '\u007F'
     val ENTER: Char = '\u000D'
+
+    /*
+    val subTreeExists = wm.trie.querySubtree("ö")
+    if(subTreeExists) {
+        for (word in wm.trie){
+            println(word)
+        }
+    }
+    else
+        println("no subtree")
+
+    Thread.sleep(3000)
+*/
+
+    // FIXME: something wrong with querying "a"
+    //  something wrong with clearing substring entirely: it should no longer yield any hits
+    //  add counter in loop over matches
+    //  consider wrapping Trie functionality in word-matcher: what is the purpose of word-matcher anyway
+    //  take sub-classes out of Trie class
 
     cw.initConsole()
 
     cw.updateAndDisplayState(substring, matches)
-    // TODO: create while loop, add more control characters
-    mainloop@for(i in 1..4) {
+    mainloop@while(true) {
         c = cw.readNextChar()
         when(c) {
             ENTER->break@mainloop
             DEL->substring=substring.dropLast(1)
             else->substring+=c
         }
-        matches = wm.findMatchingWords(words = null, subString = substring)
+        //matches = wm.findMatchingWords(words = null, subString = substring)
+
+        matches.clear()
+        subTreeExists = wm.trie.querySubtree(substring)
+        if(subTreeExists) {
+            for (match in wm.trie) {
+                matches.add(match!!)
+            }
+        }
         cw.updateAndDisplayState(substring,matches)
     }
     cw.resetConsole()
@@ -110,7 +136,21 @@ class ConsoleWrapper() {
 
 class WordMatcher() {
 
-    var words: List<String> = loadWords()
+    private var words: List<String>
+    // TODO: make private
+    var trie: Trie
+
+    init {
+        words = loadWords()
+        trie = Trie()
+        for (word in words) {
+            trie.insert(word)
+        }
+    }
+
+    fun findWord(query: String): Boolean {
+        return this.trie.isKnownWord(query)
+    }
 
     private fun loadWords(): List<String> {
         val file = File("data/english-nouns.txt")
@@ -135,7 +175,7 @@ class WordMatcher() {
         return matchingWords
     }
 
-    fun scoreSubMatch(sub: String, word: String): Float {
+    private fun scoreSubMatch(sub: String, word: String): Float {
         val ls: Int = sub.length
         val lw: Int = word.length
         if (lw >= ls && word.subSequence(0, ls) == sub)
