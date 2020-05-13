@@ -1,6 +1,6 @@
+// This class is inspired by this guy: https://gist.github.com/sagar-viradiya
+
 class Trie: Iterator<String?> {
-    // TODO: rename "word" to distinguish between query and data etc, rename functions
-    // TODO: add function that returns all child words, or an iterator that yields all child nodes
 
     // There are two types of nodes:
     //  - the ones with "word" property set are words
@@ -51,7 +51,6 @@ class Trie: Iterator<String?> {
             if (currentNode.childNodes[char] == null) {
                 currentNode.childNodes[char] = Node()
             }
-            // MutableMap<Char,Node>[] can return null, currentNode is not nullable, hence the "!!"
             currentNode = currentNode.childNodes[char]!!
         }
         // upon reaching the node with the final character of "word",

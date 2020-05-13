@@ -6,52 +6,49 @@ fun main(arg: Array<String>) {
     val cw: ConsoleWrapper = ConsoleWrapper()
     var substring: String = ""
     var matches: MutableList<String> = mutableListOf<String>()
+    val maxMatches: Int = 10
     var subTreeExists: Boolean = false
     var c: Char
 
     val DEL: Char = '\u007F'
     val ENTER: Char = '\u000D'
 
-    /*
-    val subTreeExists = wm.trie.querySubtree("ö")
-    if(subTreeExists) {
-        for (word in wm.trie){
-            println(word)
-        }
-    }
-    else
-        println("no subtree")
-
-    Thread.sleep(3000)
-*/
-
     // FIXME: something wrong with querying "a"
-    //  something wrong with clearing substring entirely: it should no longer yield any hits
-    //  add counter in loop over matches
-    //  consider wrapping Trie functionality in word-matcher: what is the purpose of word-matcher anyway
-    //  take sub-classes out of Trie class
+    //  if a substring is a word bit also part of a word ("art"/"article")
+    //  consider wrapping Trie functionality in word-matcher: what is the purpose of word-matcher anyway?
 
+    // prepare console
     cw.initConsole()
-
     cw.updateAndDisplayState(substring, matches)
+
     mainloop@while(true) {
+        // read a character from user
         c = cw.readNextChar()
         when(c) {
             ENTER->break@mainloop
             DEL->substring=substring.dropLast(1)
             else->substring+=c
         }
-        //matches = wm.findMatchingWords(words = null, subString = substring)
 
+        // find new matches
         matches.clear()
-        subTreeExists = wm.trie.querySubtree(substring)
-        if(subTreeExists) {
-            for (match in wm.trie) {
-                matches.add(match!!)
+        if(substring.isNotEmpty()) {
+            subTreeExists = wm.trie.querySubtree(substring)
+            if (subTreeExists) {
+                var count: Int = 0
+                for (match in wm.trie) {
+                    if(count++<=maxMatches)
+                        matches.add(match!!)
+                    else
+                        break
+                }
             }
         }
+        // update display
         cw.updateAndDisplayState(substring,matches)
     }
+
+    // reset console back to original state
     cw.resetConsole()
 }
 
@@ -62,8 +59,6 @@ class ConsoleWrapper() {
     private val reader = console.reader()
 
     private var cursorPosition: Int = 1
-
-    private val maxMatches: Int = 10
 
     private fun switchTerminalMode(rawMode: Boolean = false): Unit {
         // switches terminal to normal (line) mode
@@ -126,8 +121,6 @@ class ConsoleWrapper() {
         printlnAt(1, substring)
 
         for (i in matches.indices) {
-            if (i>this.maxMatches)
-                break
             printlnAt(i+2, matches[i])
         }
         placeCursor(R=1,C=this.cursorPosition)
