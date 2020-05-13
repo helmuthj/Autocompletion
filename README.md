@@ -1,13 +1,29 @@
 # Autocompletion
 Command-line autocompletion mockup coded in Kotlin
 
-## Build instructions
+## Building and running
+
+### Environment
+- I run the stuff on my Mac running macOS 10.15.4
+- I use IntelliJ IDEA 2020.1.1 (Community Edition)
+```console
+(base) Jos-2020er-MBP:Autocompletion jo$ kotlin -version
+Kotlin version 1.3.72-release-468 (JRE 14.0.1+7)
+(base) Jos-2020er-MBP:Autocompletion jo$ java --version
+openjdk 14.0.1 2020-04-14
+OpenJDK Runtime Environment AdoptOpenJDK (build 14.0.1+7)
+OpenJDK 64-Bit Server VM AdoptOpenJDK (build 14.0.1+7, mixed mode, sharing)
+```
+
+### Building the IntelliJ project
 - In IntelliJ, make sure that under Project Settings->Artifacts building a JAR "from modules with dependencies" in configured.
-- Hit "Build Artifacts" in IntelliJ
-- In a terminal: 
+- Hit "Build Artifacts"
+
+### Running
 ```console
 $java -jar out/artifacts/Autocompletion_jar/Autocompletion.jar
 ```
+
 ## Structure
 ### Resources
 - Resources, such as data files, go into /data. The folder /data is marked as "Resource Folder" in the project settings.
