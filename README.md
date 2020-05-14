@@ -16,7 +16,10 @@ OpenJDK 64-Bit Server VM AdoptOpenJDK (build 14.0.1+7, mixed mode, sharing)
 ```
 
 ### Building the IntelliJ project
-- In IntelliJ, make sure that under Project Settings->Artifacts building a JAR "from modules with dependencies" in configured.
+- In IntelliJ, make sure under Project Settings->Artifacts building a JAR "from modules with dependencies" in configured.
+- Make sure under Project Settings->Modules /src is marked as Source Folder
+- Make sure under Project Settings->Modules /data is marked as Resource Folder
+- Make sure the KotlinJavaRuntime is configured: Tools->Kotlin->Configure Kotlin in Project 
 - Hit "Build Artifacts"
 
 ### Running
